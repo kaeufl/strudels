@@ -5,7 +5,7 @@ register ('scrubResolution', (x, pat) => pat.scrub(irand(2*x).div(2*x).seg(x)))
 register('acidenv', (x, pat) => pat.lpf(100)
         .lpenv(x * 9).lps(.2).lpd(.12)
 )
-setcps(100/2048)
+setcps(120/2048)
 
 const retox_trunk = seq(
   ["[[[[9 -] 7] [- 9 - 7@2 - 7 9]@2 [- 7@2 -]]]",
@@ -24,14 +24,14 @@ const retox_volta_2 = seq(
 const float_test = "7 3 7 [5 6]"
 
 const bs = {
-  0.75: note("[c1 - c1 - c@3 c1]"),
+  0.75: note("[0 - 0 - 7@3 0]"),
   0.125: "- - -",
-  0.8125: note("[- c - c1 c c1 c -]"),
-  '0.375_0.46875': "[- c1 c -] [c c1 c -]",
-  0.4375: "[c1 - c c1] [c - - -]",
-  0.1875: "[- c - -] c1",
-  0.3125: "- [c c1] [- c] c1",
-  0.875: "[- - c c1] [c - - -]",
+  0.8125: note("[- 7 - 0 7 0 7 -]"),
+  '0.375_0.46875': "[- 0 7 -] [7 0 7 -]",
+  0.4375: "[0 - 7 0] [7 - - -]",
+  0.1875: "[- 7 - -] 0",
+  0.3125: "- [7 0] [- 7] 0",
+  0.875: "[- - 7 -] [0 - - -]",
 }
 
 //const bass_1 = seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375]))
@@ -39,7 +39,7 @@ const bass_3 = seq(seq(bs[0.75], bs[0.8125]), note("[- c1 - - c@3 c1 - c - c1 c 
 
 const bass = seq(
   seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375])),
-  seq(seq(bs[0.4375], bs[0.1875]), seq(bs[0.3125], bs[0.875])),
+  seq(seq(bs[0.4375], bs[0.1875]), seq(bs[0.3125], bs[0.875])).transpose(3),
   bass_3,
   bass_3
 )//.ribbon(0,0.25)
@@ -68,7 +68,7 @@ stack(
   .sound("gm_music_box")
   .compressor("-15:20:10:0.1:.02")
   .scale("C2:Minor")
-  .gain(slider(0.496)),
+  .gain(slider(1)),
   bass
   .compressor("-15:20:10:0.1:.02")
   // .acidenv("<0.2 0.4 0.25 0.35>")
@@ -81,7 +81,7 @@ stack(
   .acidenv("<0.2 0.4 0.25 0.35>")
   .sound("saw")
   .scale("C1:Minor")
-  .gain(slider(0.723)),
+  .gain(slider(1)),
   s("amen2*2").fit()
   //.scrubResolution(16)
   .scrub(rand_scrub)
