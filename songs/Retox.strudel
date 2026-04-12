@@ -1,12 +1,17 @@
-// licensed with CC BY-NC-SA 4.0 https://creativecommons.org/licenses/by-nc-sa/4.0/
-// by Alejandro Sánchez Medina
-//@title Retox
+// @title Retox
+await (async () => { (0, eval)(await (await fetch('https://raw.githubusercontent.com/MangoMindset/strudels/refs/heads/main/lib/KeyControl_v01.strudel')).text()); })();
+
+
 register ('scrubResolution', (x, pat) => pat.scrub(irand(2*x).div(2*x).seg(x)))
 register('acidenv', (x, pat) => pat.lpf(100)
-        .lpenv(x * 9).lps(.2).lpd(.12)
-)
-setcps(120/2048)
+        .lpenv(x * 9).lps(.2).lpd(.12))
+register('bpfill', (x,pat) => pat.bpf(x).bpq("3 2 1 [0.5 0.25]"))
 
+const toggleMelody = mute(slider(0.32), 'ö');
+const toggleBass = mute(slider(0.58), 'ä');
+const alt_drums = alternate(slider(0.221),slider(0.961), '#')
+
+setcps(130/2048)
 const retox_trunk = seq(
   ["[[[[9 -] 7] [- 9 - 7@2 - 7 9]@2 [- 7@2 -]]]",
             "[9 - 10 11 10@2 9 7@3 @2- 4 6 7 -]"],
@@ -19,9 +24,7 @@ const retox_volta_2 = seq(
    "[[- 7@2 -] [6 7@2 -]]",
    "[9 - 10 11 10@2 9 7]"
   )
-
-
-const float_test = "7 3 7 [5 6]"
+const bass_mm = "7 3 7 [5 6]"
 
 const bs = {
   0.75: note("[0 - 0 - 7@3 0]"),
@@ -33,7 +36,7 @@ const bs = {
   0.3125: "- [7 0] [- 7] 0",
   0.875: "[- - 7 -] [0@2 - -]",
   '0.484375_0.375': "[- 0 - -] [7@2 0@2]",
-  0.5625: "7 - - 0 7 0 7 -",
+  0.5625: "7 - - 0 7 0 7 -", 
   0.0625: "[7 -] [0 -] - [7 -]",
   '0.84375_0.15625': "[- 7] - 0 -"
 }
@@ -41,7 +44,7 @@ const bs = {
 //const bass_1 = seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375]))
 const bass_3 = seq(seq(bs[0.75], bs[0.8125]), note("[- c1 - - c@3 c1 - c - c1 c c1 c -]"))
 
-const bass = seq(
+const bass_pk = seq(
   seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375])),
   seq(seq(bs[0.4375], bs[0.1875]), seq(bs[0.3125], bs[0.875])).transpose(3),
   seq(seq(bs[0.75], bs[0.8125]), seq(bs['0.484375_0.375'], bs[0.5625])),
@@ -59,10 +62,13 @@ const drums_volta_2 = seq(
   "[0.4375 0.9375@3] [- 0.9375@3] 0.3125 0.875"
 ).fast(4)
 
-await samples('github:yaxu/clean-breaks/main/')
+const white_decay = 0.075
+const clickA = sound("white*16").decay(white_decay)
+const clickFill = sound("[white cp]*8").bpfill(2500).when("[1 0]*8", x =>x.decay(white_decay))
 
-stack(
-  seq(retox_trunk,
+//await samples('github:yaxu/clean-breaks/main/')
+
+let melody = seq(retox_trunk,
       cat(
         retox_volta_1,
         retox_volta_1,
@@ -72,17 +78,18 @@ stack(
   .sound("gm_music_box")
   .compressor("-15:20:10:0.1:.02")
   .scale("C2:Minor")
-  .gain(slider(1)),
-  bass
+
+stack(melody.gain(toggleMelody),
+  bass_mm
+  .compressor("-15:20:10:0.1:.02")
+  .acidenv("<0.2 0.4 0.5 0.35>")
+  .sound("saw")
+  .scale("C1:Minor")
+  .gain(toggleBass),
+  bass_pk
   .compressor("-15:20:10:0.1:.02")
   // .acidenv("<0.2 0.4 0.25 0.35>")
   .acidenv("0.4")
-  .sound("saw")
-  .scale("C1:Minor")
-  .gain(slider(1)),
-  float_test
-  .compressor("-15:20:10:0.1:.02")
-  .acidenv("<0.2 0.4 0.25 0.35>")
   .sound("saw")
   .scale("C1:Minor")
   .gain(slider(1)),
@@ -90,12 +97,13 @@ stack(
   //.scrubResolution(16)
   .scrub(rand_scrub)
   //.scrub(drums_volta_2)
-  .gain(slider(1))
-  // .lastOf(4, x=>x
-  //   //.someCycles(x=>x
-  //     .bpf(1200)
-  //     .bpq("3 2 1 [0.5 0.25]")
-  //        //)
-// ),
- //sound("white*8").decay(0.15).gain(0.3)
-).ribbon(0.0,0.5)
+  .gain(alt_drums.main)
+  .lastOf(4, x=>x
+    //.someCycles(x=>x
+      .bpfill(1200)
+         //)
+),
+clickA
+ .lastOf(4, x=>clickFill)
+ .gain(alt_drums.alt)
+).ribbon(0.0,1.0)
