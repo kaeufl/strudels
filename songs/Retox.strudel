@@ -41,15 +41,35 @@ const bs = {
   '0.84375_0.15625': "[- 7] - 0 -"
 }
 
-//const bass_1 = seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375]))
-const bass_3 = seq(seq(bs[0.75], bs[0.8125]), note("[- c1 - - c@3 c1 - c - c1 c c1 c -]"))
+const piano_rh = {
+  0.75: "[- - - - [Bb,D2,G2]@3 -]",
+  0.125: "- - -",
+  0.8125: "[- [-1,1,4] - - [6,8,11] - [6,8,11] -]".scale("c:minor"),
+  '0.375_0.46875': "[- - [-1,1,4] -] [[-1,1,4] - - -]".scale("c:minor"),
+  0.4375: "[- - [6,8,11] -] [[6,8,11] - - -]",
+  0.1875: "[- [6,8,11] - -] -",
+  0.3125: "- [[6,8,11] -] [- [6,8,11]] -",
+  0.875: "[- - [6,8,11] -] [-@2 - -]",
+  '0.484375_0.375': "[- - - -] [[6,8,11]@2 -@2]",
+  0.5625: "[6,8,11] - - - [6,8,11] - [6,8,11] -", 
+  0.0625: "[[6,8,11] -] [- -] - [[6,8,11] -]",
+  '0.84375_0.15625': "[- [6,8,11]] - - -"
+}
+
+
+const piano_rh_pk = seq(
+  seq(seq(piano_rh[0.75], piano_rh[0.125]), seq(piano_rh['0.375_0.46875'], piano_rh[0.4375])),
+  seq(seq(piano_rh[0.4375], piano_rh[0.1875]), seq(piano_rh[0.3125], piano_rh[0.875])),
+  seq(seq(piano_rh[0.75], piano_rh[0.8125]), seq(piano_rh['0.484375_0.375'], piano_rh[0.5625])),
+  seq(seq(piano_rh[0.5625], piano_rh[0.0625]), seq(piano_rh[0.4375], piano_rh['0.84375_0.15625'])),
+).transpose(24)
 
 const bass_pk = seq(
   seq(seq(bs[0.75], bs[0.125]), seq(bs['0.375_0.46875'], bs[0.4375])),
   seq(seq(bs[0.4375], bs[0.1875]), seq(bs[0.3125], bs[0.875])).transpose(3),
   seq(seq(bs[0.75], bs[0.8125]), seq(bs['0.484375_0.375'], bs[0.5625])),
   seq(seq(bs[0.5625], bs[0.0625]), seq(bs[0.4375], bs['0.84375_0.15625'])),
-)//.ribbon(0,0.25)
+)
 
 const rand_scrub = seq(
   "0.75 0.125 [0.375 0.46875] 0.4375",
@@ -92,6 +112,10 @@ stack(melody.gain(toggleMelody),
   .acidenv("0.4")
   .sound("saw")
   .scale("C1:Minor")
+  .gain(slider(1)),
+  piano_rh_pk
+  .sound("piano")
+      .scale("C1:Minor")
   .gain(slider(1)),
   s("amen2*2").fit()
   //.scrubResolution(16)
